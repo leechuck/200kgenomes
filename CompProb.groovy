@@ -29,7 +29,8 @@ new java.util.zip.GZIPInputStream(new FileInputStream(args[0])).splitEachLine("\
 def hets = [:].withDefault { 0 } // keeps max for current gene only; index -> max val
 def homs = [:].withDefault { 0 } // keeps max for current gene only; index -> max val
 def current = ""
-PrintWriter fout = new PrintWriter(new BufferedWriter(new FileWriter(args[2])))
+//PrintWriter fout = new PrintWriter(new BufferedWriter(new FileWriter(args[2])))
+EPSILON = 0.001
 withPool(16) {
     new java.util.zip.GZIPInputStream(new FileInputStream(args[1])).splitEachLine("\t") { line ->
     if (! line[0].startsWith("#")) {
@@ -41,15 +42,18 @@ withPool(16) {
 	    if (gene != current) {
 
 		DoubleArrayList l = new DoubleArrayList()
+		DoubleArrayList l2 = new DoubleArrayList()
 		hets.each { k, v -> l.add(v) }
+		homs.each { k, v -> l2.add(v) }
 		if (l.size()>0) {
 		    l.sort()
-		    fout.print(gene)
+		    l2.sort()
 		    hets.each { k, v ->
-			def q = Descriptive.quantileInverse(l, v)
-			fout.print("\t$k $v $q")
+			def hh = homs[k]
+			def q = Descriptive.quantileInverse(l, v - EPSILON) // strictly LESS
+			def hq = Descriptive.quantileInverse(l2, hh - EPSILON) // strictly LESS
+			println "$gene\t$k\t$v\t$q\t$hh\t$hq"
 		    }
-		    fout.println("")
 		}
 		// reset to new gene
 		hets = [:].withDefault { 0 }
@@ -75,6 +79,4 @@ withPool(16) {
 	}
     }
 }
-fout.flush()
-fout.close()
 
