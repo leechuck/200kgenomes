@@ -29,7 +29,6 @@ new java.util.zip.GZIPInputStream(new FileInputStream(args[0])).splitEachLine("\
 def hets = [:].withDefault { 0 } // keeps max for current gene only; index -> max val
 def homs = [:].withDefault { 0 } // keeps max for current gene only; index -> max val
 def current = ""
-//PrintWriter fout = new PrintWriter(new BufferedWriter(new FileWriter(args[2])))
 EPSILON = 0.0001
 def start = true
 def index2id = [:]
@@ -53,9 +52,7 @@ new java.util.zip.GZIPInputStream(new FileInputStream(args[1])).splitEachLine("\
 	    hets.each { k, v -> l.add(v) }
 	    homs.each { k, v -> l2.add(v) }
 	    if (l.size()>0) {
-		println "Sorting l"
 		l.sort()
-		println "Sorting l2"
 		l2.sort()
 		hets.each { k, v -> // hets include the homs, so we just iterate through the hets
 		    def hh = homs[k]
