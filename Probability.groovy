@@ -55,7 +55,7 @@ filenames.each { fn ->
 }
 PrintWriter fout = new PrintWriter(new BufferedWriter(new FileWriter("het-matrix.txt")))
 for (int i = 0 ; i < samples.size() ; i++ ) {
-    for (int j = 0 ; j < samples.size() ; j++ ) {
+    for (int j = 0 ; j < genes.size() ; j++ ) {
 	if ( j == 0 ) fout.print(hetmat[i][j]) else fout.print("\t"+hetmat[i][j])
     }
     fout.println("")
@@ -64,7 +64,7 @@ fout.flush()
 fout.close()
 fout = new PrintWriter(new BufferedWriter(new FileWriter("hom-matrix.txt")))
 for (int i = 0 ; i < samples.size() ; i++ ) {
-    for (int j = 0 ; j < samples.size() ; j++ ) {
+    for (int j = 0 ; j < genes.size() ; j++ ) {
 	if ( j == 0 ) fout.print(hommat[i][j]) else fout.print("\t"+hommat[i][j])
     }
     fout.println("")
