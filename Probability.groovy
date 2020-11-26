@@ -13,40 +13,42 @@ def l = []
 l << "X"
 l << "Y"
 
-// TODO: some stuff to get gene and individual number
-// count samples and genes
-//def samples = new LinkedHashSet()
-def genes = new LinkedHashSet()
-l.each { chr ->
-    new java.util.zip.GZIPInputStream(new FileInputStream("/ibex/scratch/projects/c2014/robert/chr${chr}-quantiles.txt.gz")).splitEachLine("\t") { line ->
-	def gene = line[0]
-//	def sample = line[1]
-	genes.add(gene)
-//	samples.add(samples)
-    }
+def samples = [:]
+def count = 0
+new File("/ibex/scratch/projects/c2014/robert/samples.txt").eachLine { line ->
+    samples[line.trim()] = count
+    count += 1
 }
-PrintWriter fout = new PrintWriter(new BufferedWriter(new FileWriter("/ibex/scratch/projects/c2014/robert/genes.txt")))
-genes.eachWithIndex { gene, idx -> fout.println("$gene\t$idx") }
-fout.flush()
-fout.close()
-fout = new PrintWriter(new BufferedWriter(new FileWriter("/ibex/scratch/projects/c2014/robert/samples.txt")))
-samples.eachWithIndex { sample, idx -> fout.println("$sample\t$idx") }
-fout.flush()
-fout.close()
-System.exit(1)
+count = 0
+def genes = [:]
+new File("/ibex/scratch/projects/c2014/robert/genes.txt").eachLine { line ->
+    genes[line.trim()] = count
+    count += 1
+}
 
-DoubleFactory2D factory = DoubleFactory2D.dense
-DoubleMatrix2D hetmat = factory.make(200000, 20000) // this is an individual x gene matrix, about 200,000 x 20,000 double values -> 32 GB
-DoubleMatrix2D hommat = factory.make(200000, 20000) // this is an individual x gene matrix, about 200,000 x 20,000 double values -> 32 GB
+def filenames = []
+def process = ["sh", "-c", "ls /ibex/scratch/projects/c2014/robert/chr*-*-quantiles.txt.gz"].execute()
+process.waitFor()
+process.text.eachLine { fn ->
+    filenames << fn
+}
+
+Float[][] hetmat = new Float[samples.size()][genes.size()] // this is a sample x gene matrix, about 200,000 x 20,000 double values -> 32 GB
+Float[][] hommat = new Float[samples.size()][genes.size()] // this is an individual x gene matrix, about 200,000 x 20,000 double values -> 32 GB
 
 //def cmap = [:].withDefault { [:].withDefault { [:] } } // chr -> pos -> alt -> val
-l.each { chr ->
-    new java.util.zip.GZIPInputStream(new FileInputStream("/ibex/scratch/projects/c2014/robert/chr${chr}-quantiles.txt.gz")).splitEachLine("\t") { line ->    
+filenames.each { fn ->
+    println fn
+    new java.util.zip.GZIPInputStream(new FileInputStream(fn)).splitEachLine("\t") { line ->    
 	def gene = line[0]
 	def pid = line[1]
 	def hetval = new Float(line[2])
 	def hetrank = new Float(line[6]) / new Float(line[7]) // kind of the quantile, mean rank / list size; interpolated rank
 	def homval = new Float(line[8])
 	def homrank = new Float(line[12]) / new Float(line[13])
+	def gpos = genes[gene]
+	def ppos = samples[pid]
+	hetmat[ppos][gpos] = hetval
+	hommat[ppos][gpos] = homval
     }
 }
