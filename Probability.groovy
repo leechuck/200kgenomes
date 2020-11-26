@@ -36,6 +36,7 @@ process.text.eachLine { fn ->
 Float[][] hetmat = new Float[samples.size()][genes.size()] // this is a sample x gene matrix, about 200,000 x 20,000 double values -> 32 GB
 Float[][] hommat = new Float[samples.size()][genes.size()] // this is an individual x gene matrix, about 200,000 x 20,000 double values -> 32 GB
 
+
 //def cmap = [:].withDefault { [:].withDefault { [:] } } // chr -> pos -> alt -> val
 filenames.each { fn ->
     println fn
@@ -52,3 +53,21 @@ filenames.each { fn ->
 	hommat[ppos][gpos] = homval
     }
 }
+PrintWriter fout = new PrintWriter(new BufferedWriter(new FileWriter("het-matrix.txt")))
+for (int i = 0 ; i < samples.size() ; i++ ) {
+    for (int j = 0 ; j < samples.size() ; j++ ) {
+	if ( j == 0 ) fout.print(hetmat[i][j]) else fout.print("\t"+hetmat[i][j])
+    }
+    fout.println("")
+}
+fout.flush()
+fout.close()
+fout = new PrintWriter(new BufferedWriter(new FileWriter("hom-matrix.txt")))
+for (int i = 0 ; i < samples.size() ; i++ ) {
+    for (int j = 0 ; j < samples.size() ; j++ ) {
+	if ( j == 0 ) fout.print(hommat[i][j]) else fout.print("\t"+hommat[i][j])
+    }
+    fout.println("")
+}
+fout.flush()
+fout.close()
